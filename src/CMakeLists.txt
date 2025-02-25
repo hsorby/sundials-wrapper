@@ -1,8 +1,4 @@
 
-#include <cvode/cvode.h>
-#include <nvector/nvector_serial.h>
-#include <sunlinsol/sunlinsol_dense.h>
-
 set(SWIG_INTERFACE_SRCS
     cvode.i
     cvode_ls.i
@@ -40,24 +36,18 @@ foreach(SWIG_INTERFACE_SRC ${SWIG_INTERFACE_SRCS})
   )
   target_link_libraries(${MODULE_TARGET} PRIVATE SUNDIALS::nvecserial_shared SUNDIALS::cvode_shared SUNDIALS::kinsol_shared)
 
-  if(FIND_PYTHON_DEVELOPMENT_MODULE)
-    set(_PYTHON_LINK_TARGET Python::Module)
-  else()
-    set(_PYTHON_LINK_TARGET Python::Python)
-  endif()
-
   if (APPLE)
     # Specifically allow dynamic lookup, here we are really targetting Python symbols.
     #set_target_properties(${MODULE_TARGET} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
     # But, we do need to know about the Python include directories.
     target_include_directories(${MODULE_TARGET} PRIVATE ${Python_INCLUDE_DIRS})
-    target_link_libraries(${MODULE_TARGET} PRIVATE ${_PYTHON_LINK_TARGET})
+    target_link_libraries(${MODULE_TARGET} PRIVATE Python::Module)
   elseif (UNDEFINED_SYMBOLS_ALLOWED)
     # Linker allows undefined symbols, so let's not link Python.
     # But, we do need to know about the Python include directories.
     target_include_directories(${MODULE_TARGET} PRIVATE ${Python_INCLUDE_DIRS})
   else()
-    target_link_libraries(${MODULE_TARGET} PRIVATE ${_PYTHON_LINK_TARGET})
+    target_link_libraries(${MODULE_TARGET} PRIVATE Python::Module)
   endif()
   # Disable use of Debug Python libraries when not present on Windows
   # See http://stackoverflow.com/questions/11311877/creating-a-dll-from-a-wrapped-cpp-file-with-swig
